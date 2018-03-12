@@ -9,6 +9,8 @@ MAINTAINER Lars Gierth <lgierth@ipfs.io>
 ENV GX_IPFS ""
 ENV SRC_DIR /go/src/github.com/ipfs/go-ipfs
 
+RUN apt update && apt upgrade -y && apt install build-essential -y
+
 COPY . $SRC_DIR
 
 # Build the thing.
