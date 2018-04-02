@@ -11,13 +11,14 @@ import (
 	"strings"
 
 	assets "github.com/ipfs/go-ipfs/assets"
-	cmds "github.com/ipfs/go-ipfs/commands"
+	oldcmds "github.com/ipfs/go-ipfs/commands"
 	core "github.com/ipfs/go-ipfs/core"
 	namesys "github.com/ipfs/go-ipfs/namesys"
 	config "github.com/ipfs/go-ipfs/repo/config"
 	fsrepo "github.com/ipfs/go-ipfs/repo/fsrepo"
 
 	"gx/ipfs/QmceUdzxkimdYsgtX733uNgzf1DLHyBKN6ehGSp85ayppM/go-ipfs-cmdkit"
+	"gx/ipfs/QmfAkMSt9Fwzk48QDJecPcwCUjnf2uG7MLnmCGTp4C6ouL/go-ipfs-cmds"
 )
 
 const (
@@ -38,6 +39,9 @@ Available profiles:
         running IPFS on machines with public IPv4 addresses.
     'test' - Reduces external interference of IPFS daemon, this
         is useful when using the daemon in test environments.
+    'lowpower' - Reduces daemon overhead on the system. May affect node
+        functionality - performance of content discovery and data fetching
+        may be degraded.
 
 ipfs uses a repository in the local file system. By default, the repo is
 located at ~/.ipfs. To change the repo location, set the $IPFS_PATH
@@ -59,8 +63,9 @@ environment variable:
 		// name of the file?
 		// TODO cmdkit.StringOption("event-logs", "l", "Location for machine-readable event logs."),
 	},
-	PreRun: func(req cmds.Request) error {
-		daemonLocked, err := fsrepo.LockedByOtherProcess(req.InvocContext().ConfigRoot)
+	PreRun: func(req *cmds.Request, env cmds.Environment) error {
+		cctx := env.(*oldcmds.Context)
+		daemonLocked, err := fsrepo.LockedByOtherProcess(cctx.ConfigRoot)
 		if err != nil {
 			return err
 		}
@@ -74,30 +79,19 @@ environment variable:
 
 		return nil
 	},
-	Run: func(req cmds.Request, res cmds.Response) {
-		// needs to be called at least once
-		res.SetOutput(nil)
-
-		if req.InvocContext().Online {
-			res.SetError(errors.New("init must be run offline only!"), cmdkit.ErrNormal)
+	Run: func(req *cmds.Request, res cmds.ResponseEmitter, env cmds.Environment) {
+		cctx := env.(*oldcmds.Context)
+		if cctx.Online {
+			res.SetError(errors.New("init must be run offline only"), cmdkit.ErrNormal)
 			return
 		}
 
-		empty, _, err := req.Option("e").Bool()
-		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
-			return
-		}
-
-		nBitsForKeypair, _, err := req.Option("b").Int()
-		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
-			return
-		}
+		empty, _ := req.Options["empty-repo"].(bool)
+		nBitsForKeypair, _ := req.Options["bits"].(int)
 
 		var conf *config.Config
 
-		f := req.Files()
+		f := req.Files
 		if f != nil {
 			confFile, err := f.NextFile()
 			if err != nil {
@@ -112,18 +106,14 @@ environment variable:
 			}
 		}
 
-		profile, _, err := req.Option("profile").String()
-		if err != nil {
-			res.SetError(err, cmdkit.ErrNormal)
-			return
-		}
+		profile, _ := req.Options["profile"].(string)
 
 		var profiles []string
 		if profile != "" {
 			profiles = strings.Split(profile, ",")
 		}
 
-		if err := doInit(os.Stdout, req.InvocContext().ConfigRoot, empty, nBitsForKeypair, profiles, conf); err != nil {
+		if err := doInit(os.Stdout, cctx.ConfigRoot, empty, nBitsForKeypair, profiles, conf); err != nil {
 			res.SetError(err, cmdkit.ErrNormal)
 			return
 		}
@@ -134,8 +124,13 @@ var errRepoExists = errors.New(`ipfs configuration file already exists!
 Reinitializing would overwrite your keys.
 `)
 
-func initWithDefaults(out io.Writer, repoRoot string) error {
-	return doInit(out, repoRoot, false, nBitsForKeypairDefault, nil, nil)
+func initWithDefaults(out io.Writer, repoRoot string, profile string) error {
+	var profiles []string
+	if profile != "" {
+		profiles = strings.Split(profile, ",")
+	}
+
+	return doInit(out, repoRoot, false, nBitsForKeypairDefault, profiles, nil)
 }
 
 func doInit(out io.Writer, repoRoot string, empty bool, nBitsForKeypair int, confProfiles []string, conf *config.Config) error {

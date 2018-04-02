@@ -16,12 +16,12 @@ import (
 	mfs "github.com/ipfs/go-ipfs/mfs"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 
-	bstore "gx/ipfs/QmTVDM4LCSUMFNQzbDLL9zQwp8usE6QHymFdh3h8vL9v6b/go-ipfs-blockstore"
 	mh "gx/ipfs/QmZyZDi491cCNTLfAhwcaDii2Kg4pwKRkhqQzURGDvY6ua/go-multihash"
-	cmds "gx/ipfs/QmabLouZTZwhfALuBcssPvkzhbYGMb4394huT7HY4LQ6d3/go-ipfs-cmds"
+	bstore "gx/ipfs/QmaG4DZ4JaqEfvPWt5nPPgoTzhc1tr1T3f4Nu9Jpdm8ymY/go-ipfs-blockstore"
 	cmdkit "gx/ipfs/QmceUdzxkimdYsgtX733uNgzf1DLHyBKN6ehGSp85ayppM/go-ipfs-cmdkit"
 	files "gx/ipfs/QmceUdzxkimdYsgtX733uNgzf1DLHyBKN6ehGSp85ayppM/go-ipfs-cmdkit/files"
 	pb "gx/ipfs/QmeWjRodbcZFKe5tMN7poEx3izym6osrLSnTLf9UjJZBbs/pb"
+	cmds "gx/ipfs/QmfAkMSt9Fwzk48QDJecPcwCUjnf2uG7MLnmCGTp4C6ouL/go-ipfs-cmds"
 )
 
 // ErrDepthLimitExceeded indicates that the max depth has been exceded.
@@ -258,7 +258,7 @@ You can now check what blocks have been created by:
 			exch = offline.Exchange(addblockstore)
 		}
 
-		bserv := blockservice.New(addblockstore, exch)
+		bserv := blockservice.New(addblockstore, exch) // hash security 001
 		dserv := dag.NewDAGService(bserv)
 
 		outChan := make(chan interface{}, adderOutChanSize)
@@ -283,7 +283,10 @@ You can now check what blocks have been created by:
 
 		if hash {
 			md := dagtest.Mock()
-			mr, err := mfs.NewRoot(req.Context, md, ft.EmptyDirNode(), nil)
+			emptyDirNode := ft.EmptyDirNode()
+			// Use the same prefix for the "empty" MFS root as for the file adder.
+			emptyDirNode.Prefix = *fileAdder.Prefix
+			mr, err := mfs.NewRoot(req.Context, md, emptyDirNode, nil)
 			if err != nil {
 				res.SetError(err, cmdkit.ErrNormal)
 				return
