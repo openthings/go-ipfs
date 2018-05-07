@@ -10,7 +10,6 @@ import (
 	"time"
 
 	bserv "github.com/ipfs/go-ipfs/blockservice"
-	offline "github.com/ipfs/go-ipfs/exchange/offline"
 	filestore "github.com/ipfs/go-ipfs/filestore"
 	dag "github.com/ipfs/go-ipfs/merkledag"
 	resolver "github.com/ipfs/go-ipfs/path/resolver"
@@ -22,6 +21,7 @@ import (
 
 	metrics "gx/ipfs/QmRg1gKTHzc3CZXSKzem8aR4E3TubFhbgXwfVuWnSK5CC5/go-metrics-interface"
 	goprocessctx "gx/ipfs/QmSF8fPo3jgVBAy8fpdjjYqgG87dkJgUprRBHRd2tmfgpP/goprocess/context"
+	offline "gx/ipfs/QmWM5HhdG5ZQNyHQ5XhMdGmV9CvLpFynQfGpTxN2MEM7Lc/go-ipfs-exchange-offline"
 	ds "gx/ipfs/QmXRKBQA4wXP7xWbFiZsR1GP4HV6wMDQ1aWFxZZ4uBcPX9/go-datastore"
 	retry "gx/ipfs/QmXRKBQA4wXP7xWbFiZsR1GP4HV6wMDQ1aWFxZZ4uBcPX9/go-datastore/retrystore"
 	dsync "gx/ipfs/QmXRKBQA4wXP7xWbFiZsR1GP4HV6wMDQ1aWFxZZ4uBcPX9/go-datastore/sync"
@@ -229,7 +229,7 @@ func setupNode(ctx context.Context, n *IpfsNode, cfg *BuildCfg) error {
 	internalDag := dag.NewDAGService(bserv.New(n.Blockstore, offline.Exchange(n.Blockstore)))
 	n.Pinning, err = pin.LoadPinner(n.Repo.Datastore(), n.DAG, internalDag)
 	if err != nil {
-		// TODO: we should move towards only running 'NewPinner' explicity on
+		// TODO: we should move towards only running 'NewPinner' explicitly on
 		// node init instead of implicitly here as a result of the pinner keys
 		// not being found in the datastore.
 		// this is kinda sketchy and could cause data loss

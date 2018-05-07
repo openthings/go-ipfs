@@ -15,12 +15,12 @@ import (
 
 	bserv "github.com/ipfs/go-ipfs/blockservice"
 	bstest "github.com/ipfs/go-ipfs/blockservice/test"
-	offline "github.com/ipfs/go-ipfs/exchange/offline"
 	. "github.com/ipfs/go-ipfs/merkledag"
 	mdpb "github.com/ipfs/go-ipfs/merkledag/pb"
 	dstest "github.com/ipfs/go-ipfs/merkledag/test"
 
 	u "gx/ipfs/QmNiJuT8Ja3hMVpBHXv3Q6dwmperaQ6JjLtpMQgMCD7xvx/go-ipfs-util"
+	offline "gx/ipfs/QmWM5HhdG5ZQNyHQ5XhMdGmV9CvLpFynQfGpTxN2MEM7Lc/go-ipfs-exchange-offline"
 	cid "gx/ipfs/QmcZfnkapfECQGcLZaf9B79NRg7cRa9EnZh4LSbkCzwNvY/go-cid"
 	ipld "gx/ipfs/Qme5bWv7wtjUNGsK2BNGVUFPKiuxWrsqrtvYwCLRw8YFES/go-ipld-format"
 	blocks "gx/ipfs/Qmej7nf81hi2x2tvjRBF3mcp74sQyuDH4VMYDGd1YtXjb2/go-block-format"
@@ -340,7 +340,7 @@ func TestFetchFailure(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		err = top.AddNodeLinkClean(fmt.Sprintf("AA%d", i), nd)
+		err = top.AddNodeLink(fmt.Sprintf("AA%d", i), nd)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -353,7 +353,7 @@ func TestFetchFailure(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		err = top.AddNodeLinkClean(fmt.Sprintf("BB%d", i), nd)
+		err = top.AddNodeLink(fmt.Sprintf("BB%d", i), nd)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -597,19 +597,19 @@ func TestEnumerateAsyncFailsNotFound(t *testing.T) {
 	}
 
 	parent := new(ProtoNode)
-	if err := parent.AddNodeLinkClean("a", a); err != nil {
+	if err := parent.AddNodeLink("a", a); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := parent.AddNodeLinkClean("b", b); err != nil {
+	if err := parent.AddNodeLink("b", b); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := parent.AddNodeLinkClean("c", c); err != nil {
+	if err := parent.AddNodeLink("c", c); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := parent.AddNodeLinkClean("d", d); err != nil {
+	if err := parent.AddNodeLink("d", d); err != nil {
 		t.Fatal(err)
 	}
 
@@ -696,7 +696,7 @@ func mkNodeWithChildren(getChild func() *ProtoNode, width int) *ProtoNode {
 
 	for i := 0; i < width; i++ {
 		c := getChild()
-		if err := cur.AddNodeLinkClean(fmt.Sprint(i), c); err != nil {
+		if err := cur.AddNodeLink(fmt.Sprint(i), c); err != nil {
 			panic(err)
 		}
 	}

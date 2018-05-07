@@ -22,7 +22,6 @@ import (
 	"time"
 
 	bserv "github.com/ipfs/go-ipfs/blockservice"
-	exchange "github.com/ipfs/go-ipfs/exchange"
 	bitswap "github.com/ipfs/go-ipfs/exchange/bitswap"
 	bsnet "github.com/ipfs/go-ipfs/exchange/bitswap/network"
 	rp "github.com/ipfs/go-ipfs/exchange/reprovide"
@@ -71,6 +70,7 @@ import (
 	ifconnmgr "gx/ipfs/Qmax8X1Kfahf5WfSB68EWDG3d3qyS3Sqs1v412fjPTfRwx/go-libp2p-interface-connmgr"
 	mplex "gx/ipfs/Qmc14vuKyGqX27RvBhekYytxSFJpaEgQVuVJgKSm69MEix/go-smux-multiplex"
 	cid "gx/ipfs/QmcZfnkapfECQGcLZaf9B79NRg7cRa9EnZh4LSbkCzwNvY/go-cid"
+	exchange "gx/ipfs/QmdcAXgEHUueP4A7b5hjabKn2EooeHgMreMvFC249dGCgc/go-ipfs-exchange-interface"
 	metrics "gx/ipfs/QmdeBtQGXjSt7cb97nx9JyLHHv5va2LyEAue7Q5tDFzpLy/go-libp2p-metrics"
 	ipld "gx/ipfs/Qme5bWv7wtjUNGsK2BNGVUFPKiuxWrsqrtvYwCLRw8YFES/go-ipld-format"
 	pnet "gx/ipfs/QmenK8PgcpM2KYzEKnGx1LyN1QXawswM2F6HktCbWKuC1b/go-libp2p-pnet"
@@ -245,7 +245,7 @@ func (n *IpfsNode) startOnlineServices(ctx context.Context, routingOption Routin
 	}
 
 	// Ok, now we're ready to listen.
-	if err := startListening(ctx, n.PeerHost, cfg); err != nil {
+	if err := startListening(n.PeerHost, cfg); err != nil {
 		return err
 	}
 
@@ -452,9 +452,8 @@ func (n *IpfsNode) startOnlineServicesWithHost(ctx context.Context, host p2phost
 	n.PeerHost = rhost.Wrap(host, n.Routing)
 
 	// setup exchange service
-	const alwaysSendToPeer = true // use YesManStrategy
 	bitswapNetwork := bsnet.NewFromIpfsHost(n.PeerHost, n.Routing)
-	n.Exchange = bitswap.New(ctx, n.Identity, bitswapNetwork, n.Blockstore, alwaysSendToPeer)
+	n.Exchange = bitswap.New(ctx, bitswapNetwork, n.Blockstore)
 
 	size, err := n.getCacheSize()
 	if err != nil {
@@ -919,7 +918,7 @@ func composeAddrsFactory(f, g p2pbhost.AddrsFactory) p2pbhost.AddrsFactory {
 }
 
 // startListening on the network addresses
-func startListening(ctx context.Context, host p2phost.Host, cfg *config.Config) error {
+func startListening(host p2phost.Host, cfg *config.Config) error {
 	listenAddrs, err := listenAddresses(cfg)
 	if err != nil {
 		return err
