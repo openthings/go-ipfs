@@ -10,9 +10,9 @@ import (
 	dag "github.com/ipfs/go-ipfs/merkledag"
 	path "github.com/ipfs/go-ipfs/path"
 
-	logging "gx/ipfs/QmRb5jh8z2E8hMGN2tkvs1yHynUanqnZ3UeKwgN1i9P1F8/go-log"
-	cid "gx/ipfs/QmcZfnkapfECQGcLZaf9B79NRg7cRa9EnZh4LSbkCzwNvY/go-cid"
-	ipld "gx/ipfs/Qme5bWv7wtjUNGsK2BNGVUFPKiuxWrsqrtvYwCLRw8YFES/go-ipld-format"
+	cid "gx/ipfs/QmYVNvtQkeZ6AKSwDrjQTs432QtL6umrrK41EBq3cu7iSP/go-cid"
+	ipld "gx/ipfs/QmZtNq8dArGfnpCZfx2pUNY7UcjGhVp5qqwQ4hH6mpTMRQ/go-ipld-format"
+	logging "gx/ipfs/QmcVVHfdyv15GVPk7NrxdWjh2hLVccXnoD8j2tyQShiXJb/go-log"
 )
 
 var log = logging.Logger("pathresolv")
@@ -34,6 +34,9 @@ func (e ErrNoLink) Error() string {
 	return fmt.Sprintf("no link named %q under %s", e.Name, e.Node.String())
 }
 
+// ResolveOnce resolves path through a single node
+type ResolveOnce func(ctx context.Context, ds ipld.NodeGetter, nd ipld.Node, names []string) (*ipld.Link, []string, error)
+
 // Resolver provides path resolution to IPFS
 // It has a pointer to a DAGService, which is uses to resolve nodes.
 // TODO: now that this is more modular, try to unify this code with the
@@ -41,7 +44,7 @@ func (e ErrNoLink) Error() string {
 type Resolver struct {
 	DAG ipld.NodeGetter
 
-	ResolveOnce func(ctx context.Context, ds ipld.NodeGetter, nd ipld.Node, names []string) (*ipld.Link, []string, error)
+	ResolveOnce ResolveOnce
 }
 
 // NewBasicResolver constructs a new basic resolver.
