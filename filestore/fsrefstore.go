@@ -10,11 +10,11 @@ import (
 
 	pb "github.com/ipfs/go-ipfs/filestore/pb"
 
-	blockstore "gx/ipfs/QmRatnbGjPcoyzVjfixMZnuT1xQbjM7FgnL6FX4CKJeDE2/go-ipfs-blockstore"
 	posinfo "gx/ipfs/QmSHjPDw8yNgLZ7cBfX7w3Smn7PHwYhNEpd4LHQQxUg35L/go-ipfs-posinfo"
-	proto "gx/ipfs/QmT6n4mspWYEya864BhCUJEgyxiRfmiSY9ruQwTUNpRKaM/protobuf/proto"
 	blocks "gx/ipfs/QmVzK524a2VWLqyvtBeiHKsUAWYgeAk4DBeZoY7vpNPNRx/go-block-format"
 	cid "gx/ipfs/QmYVNvtQkeZ6AKSwDrjQTs432QtL6umrrK41EBq3cu7iSP/go-cid"
+	proto "gx/ipfs/QmZHU2gx42NPTYXzw6pJkuX6xCE7bKECp6e8QcPdoLx8sx/protobuf/proto"
+	blockstore "gx/ipfs/QmadMhXJLHMFjpRmh85XjpmVDkEtQpNYEZNRpWRvYVLrvb/go-ipfs-blockstore"
 	dshelp "gx/ipfs/Qmd8UZEDddMaCnQ1G5eSrUhN3coX19V7SyXNQGWnAvUsnT/go-ipfs-ds-help"
 	ds "gx/ipfs/QmeiCcJfDW1GJnWUArudsv5rQsihpi4oyddPhdqo3CfX6i/go-datastore"
 	dsns "gx/ipfs/QmeiCcJfDW1GJnWUArudsv5rQsihpi4oyddPhdqo3CfX6i/go-datastore/namespace"
@@ -216,9 +216,9 @@ func (f *FileManager) readURLDataObj(c *cid.Cid, d *pb.DataObj) ([]byte, error) 
 	if err != nil {
 		return nil, &CorruptReferenceError{StatusFileError, err}
 	}
-	if res.StatusCode != http.StatusPartialContent {
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusPartialContent {
 		return nil, &CorruptReferenceError{StatusFileError,
-			fmt.Errorf("expected HTTP 206 got %d", res.StatusCode)}
+			fmt.Errorf("expected HTTP 200 or 206 got %d", res.StatusCode)}
 	}
 
 	outbuf := make([]byte, d.GetSize_())
