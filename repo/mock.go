@@ -5,8 +5,8 @@ import (
 
 	filestore "github.com/ipfs/go-ipfs/filestore"
 	keystore "github.com/ipfs/go-ipfs/keystore"
-	"github.com/ipfs/go-ipfs/repo/config"
 
+	config "gx/ipfs/QmTyiSs9VgdVb4pnzdjtKhcfdTkHFEaNn6xnCbZq4DTFRt/go-ipfs-config"
 	ma "gx/ipfs/QmYmsdtJ3HsodkePE3eU3TsCaP2YvPZJ4LoXnNkDE5Tpt7/go-multiaddr"
 )
 

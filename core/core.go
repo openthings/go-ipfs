@@ -20,61 +20,62 @@ import (
 	"strings"
 	"time"
 
+	version "github.com/ipfs/go-ipfs"
 	rp "github.com/ipfs/go-ipfs/exchange/reprovide"
 	filestore "github.com/ipfs/go-ipfs/filestore"
 	mount "github.com/ipfs/go-ipfs/fuse/mount"
-	mfs "github.com/ipfs/go-ipfs/mfs"
 	namesys "github.com/ipfs/go-ipfs/namesys"
 	ipnsrp "github.com/ipfs/go-ipfs/namesys/republisher"
 	p2p "github.com/ipfs/go-ipfs/p2p"
 	pin "github.com/ipfs/go-ipfs/pin"
 	repo "github.com/ipfs/go-ipfs/repo"
-	config "github.com/ipfs/go-ipfs/repo/config"
-	bserv "gx/ipfs/QmNqRBAhovtf4jVd5cF7YvHaFSsQHHZBaUFwGQWPM2CV7R/go-blockservice"
-	merkledag "gx/ipfs/QmRy4Qk9hbgFX9NGJRm8rBThrA8PZhNCitMgeRYyZ67s59/go-merkledag"
-	bitswap "gx/ipfs/QmSLYFS88MpPsszqWdhGSxvHyoTnmaU4A74SD6KGib6Z3m/go-bitswap"
-	bsnet "gx/ipfs/QmSLYFS88MpPsszqWdhGSxvHyoTnmaU4A74SD6KGib6Z3m/go-bitswap/network"
-	ft "gx/ipfs/QmSaz8Qg77gGqvDvLKeSAY7ivDEnramSWF6T7TcRwFpHtP/go-unixfs"
-	"gx/ipfs/QmYKNMEUK7nCVAefgXF1LVtZEZg3uRmBqiae4FJRXDNAyJ/go-path/resolver"
 
 	u "gx/ipfs/QmPdKqUcHGFdeSpvjVoaTRPPstGif9GBZb5Q56RVw9o69A/go-ipfs-util"
-	rhelpers "gx/ipfs/QmQpvpeXa8rBfDmt3bdh2ckw2867vsYN1ozf79X7U5rij9/go-libp2p-routing-helpers"
-	pnet "gx/ipfs/QmRGvSwDpN4eunxgDNfmQhayZ6Z9F5a2v31V2D7y77osLg/go-libp2p-pnet"
-	psrouter "gx/ipfs/QmS3QZaaGMLwYQD1cWaGnM4san4zzT7z31tmhuXJMZ91dh/go-libp2p-pubsub-router"
+	psrouter "gx/ipfs/QmPksYjuFjt2M63ufuDYEFdwVAmFcDGJgoED8T8dwfcwED/go-libp2p-pubsub-router"
+	ic "gx/ipfs/QmPvyPwuCgJ7pDmrKDxRtsScJgBaM5h4EpRL2qQJsmXf4n/go-libp2p-crypto"
+	libp2p "gx/ipfs/QmQiaskfWpdRJ4x2spEQjPFTUkEB87KDYu91qnNYBqvvcX/go-libp2p"
+	discovery "gx/ipfs/QmQiaskfWpdRJ4x2spEQjPFTUkEB87KDYu91qnNYBqvvcX/go-libp2p/p2p/discovery"
+	p2pbhost "gx/ipfs/QmQiaskfWpdRJ4x2spEQjPFTUkEB87KDYu91qnNYBqvvcX/go-libp2p/p2p/host/basic"
+	rhost "gx/ipfs/QmQiaskfWpdRJ4x2spEQjPFTUkEB87KDYu91qnNYBqvvcX/go-libp2p/p2p/host/routed"
+	identify "gx/ipfs/QmQiaskfWpdRJ4x2spEQjPFTUkEB87KDYu91qnNYBqvvcX/go-libp2p/p2p/protocol/identify"
+	ping "gx/ipfs/QmQiaskfWpdRJ4x2spEQjPFTUkEB87KDYu91qnNYBqvvcX/go-libp2p/p2p/protocol/ping"
+	ft "gx/ipfs/QmQjEpRiwVvtowhq69dAtB4jhioPVFXiCcWZm9Sfgn7eqc/go-unixfs"
+	peer "gx/ipfs/QmQsErDt8Qgw1XrsXf2BpEzDgGWtB1YLsTAARBup5b6B9W/go-libp2p-peer"
+	connmgr "gx/ipfs/QmRAvQVfAFfzqwk1VBYJMci9SrqJcMULNJYeZzzprDRn5V/go-libp2p-connmgr"
+	p2phost "gx/ipfs/QmRRCrNRs4qxotXx7WJT6SpCvSNEhXvyBcVjXY2K71pcjE/go-libp2p-host"
+	logging "gx/ipfs/QmRREK2CAZ5Re2Bd9zZFG6FeYDppUWt5cMgsoUEp3ktgSr/go-log"
+	merkledag "gx/ipfs/QmRiQCJZ91B7VNmLvA6sxzDuBJGSojS3uXHHVuNr3iueNZ/go-merkledag"
+	routing "gx/ipfs/QmS4niovD1U6pRjUBXivr1zvvLBqiTKbERjFo994JU7oQS/go-libp2p-routing"
 	goprocess "gx/ipfs/QmSF8fPo3jgVBAy8fpdjjYqgG87dkJgUprRBHRd2tmfgpP/goprocess"
 	mamask "gx/ipfs/QmSMZwvs3n4GBikZ7hKzT17c3bk65FmyZo2JqtJ16swqCv/multiaddr-filter"
 	mafilter "gx/ipfs/QmSW4uNHbvQia8iZDXzbwjiyHQtnyo9aFqfQAMasj3TJ6Y/go-maddr-filter"
-	dht "gx/ipfs/QmTktQYCKzQjhxF6dk5xJPRuhHn3JBiKGvMLoiDy1mYmxC/go-libp2p-kad-dht"
-	dhtopts "gx/ipfs/QmTktQYCKzQjhxF6dk5xJPRuhHn3JBiKGvMLoiDy1mYmxC/go-libp2p-kad-dht/opts"
-	record "gx/ipfs/QmVsp2KdPYE6M8ryzCk5KHLo3zprcY5hBDaYx6uPCFUdxA/go-libp2p-record"
-	floodsub "gx/ipfs/QmXScvRbYh9X9okLuX9YMnz1HR4WgRTU2hocjBs15nmCNG/go-libp2p-floodsub"
-	ifconnmgr "gx/ipfs/QmXuucFcuvAWYAJfhHV2h4BYreHEAsLSsiquosiXeuduTN/go-libp2p-interface-connmgr"
-	libp2p "gx/ipfs/QmY51bqSM5XgxQZqsBrQcRkKTnCb8EKpJpR9K6Qax7Njco/go-libp2p"
-	discovery "gx/ipfs/QmY51bqSM5XgxQZqsBrQcRkKTnCb8EKpJpR9K6Qax7Njco/go-libp2p/p2p/discovery"
-	p2pbhost "gx/ipfs/QmY51bqSM5XgxQZqsBrQcRkKTnCb8EKpJpR9K6Qax7Njco/go-libp2p/p2p/host/basic"
-	rhost "gx/ipfs/QmY51bqSM5XgxQZqsBrQcRkKTnCb8EKpJpR9K6Qax7Njco/go-libp2p/p2p/host/routed"
-	identify "gx/ipfs/QmY51bqSM5XgxQZqsBrQcRkKTnCb8EKpJpR9K6Qax7Njco/go-libp2p/p2p/protocol/identify"
-	ping "gx/ipfs/QmY51bqSM5XgxQZqsBrQcRkKTnCb8EKpJpR9K6Qax7Njco/go-libp2p/p2p/protocol/ping"
+	dht "gx/ipfs/QmTRj8mj6X5LtjVochPPSNX6MTbJ6iVojcfakWJKG13re7/go-libp2p-kad-dht"
+	dhtopts "gx/ipfs/QmTRj8mj6X5LtjVochPPSNX6MTbJ6iVojcfakWJKG13re7/go-libp2p-kad-dht/opts"
+	bitswap "gx/ipfs/QmTtmrK4iiM3MxWNA3pvbM9ekQiGZAiFyo57GP8B9FFgtz/go-bitswap"
+	bsnet "gx/ipfs/QmTtmrK4iiM3MxWNA3pvbM9ekQiGZAiFyo57GP8B9FFgtz/go-bitswap/network"
+	config "gx/ipfs/QmTyiSs9VgdVb4pnzdjtKhcfdTkHFEaNn6xnCbZq4DTFRt/go-ipfs-config"
+	ifconnmgr "gx/ipfs/QmUPz6FCzCCU7sTY9Sore5NGSUA8YSF2yMkLPjDFq7wGqD/go-libp2p-interface-connmgr"
+	floodsub "gx/ipfs/QmVFB6rGJEZnzJrQwoEhbyDs1tA8RVsQvCS6JXpuw9Xtta/go-libp2p-floodsub"
+	ds "gx/ipfs/QmVG5gxteQNEMhrS8prJSmU2C9rebtFuTd3SYZ5kE3YZ5k/go-datastore"
+	exchange "gx/ipfs/QmWw71Mz9PXKgYG8ZfTYN7Ax2Zm48Eurbne3wC2y7CKmLz/go-ipfs-exchange-interface"
+	ipld "gx/ipfs/QmX5CsuHyVZeTLxgRSYkgLSDQKb9UjE8xnhQzCEJWWWFsC/go-ipld-format"
 	smux "gx/ipfs/QmY9JXR3FupnYAYJWK9aMr9bCpqWKcToQ1tz8DVGTrHpHw/go-stream-muxer"
-	connmgr "gx/ipfs/QmYAL9JsqVVPFWwM1ZzHNsofmTzRYQHJ2KqQaBmFJjJsNx/go-libp2p-connmgr"
-	cid "gx/ipfs/QmYVNvtQkeZ6AKSwDrjQTs432QtL6umrrK41EBq3cu7iSP/go-cid"
 	ma "gx/ipfs/QmYmsdtJ3HsodkePE3eU3TsCaP2YvPZJ4LoXnNkDE5Tpt7/go-multiaddr"
-	routing "gx/ipfs/QmZ383TySJVeZWzGnWui6pRcKyYZk9VkKTuW7tmKRWk5au/go-libp2p-routing"
-	mplex "gx/ipfs/QmZHiqdRuNXujvSPNu1ZWxxzV6a2WhoZpfYkesdgyaKF9f/go-smux-multiplex"
-	pstore "gx/ipfs/QmZR2XWVVBCtbgBWnQhWk2xcQfaR3W8faQPriAiaaj7rsr/go-libp2p-peerstore"
-	ipld "gx/ipfs/QmZtNq8dArGfnpCZfx2pUNY7UcjGhVp5qqwQ4hH6mpTMRQ/go-ipld-format"
-	bstore "gx/ipfs/QmadMhXJLHMFjpRmh85XjpmVDkEtQpNYEZNRpWRvYVLrvb/go-ipfs-blockstore"
-	p2phost "gx/ipfs/Qmb8T6YBBsjYsVGfrihQLfCJveczZnneSBqBKkYEBWDjge/go-libp2p-host"
-	nilrouting "gx/ipfs/QmbFRJeEmEU16y3BmKKaD4a9fm5oHsEAMHe2vSB1UnfLMi/go-ipfs-routing/none"
-	offroute "gx/ipfs/QmbFRJeEmEU16y3BmKKaD4a9fm5oHsEAMHe2vSB1UnfLMi/go-ipfs-routing/offline"
-	exchange "gx/ipfs/Qmc2faLf7URkHpsbfYM4EMbr8iSAcGAe8VPgVi64HVnwji/go-ipfs-exchange-interface"
-	circuit "gx/ipfs/QmcQ56iqKP8ZRhRGLe5EReJVvrJZDaGzkuatrPv4Z1B6cG/go-libp2p-circuit"
-	logging "gx/ipfs/QmcVVHfdyv15GVPk7NrxdWjh2hLVccXnoD8j2tyQShiXJb/go-log"
-	metrics "gx/ipfs/QmcoBbyTiL9PFjo1GFixJwqQ8mZLJ36CribuqyKmS1okPu/go-libp2p-metrics"
+	cid "gx/ipfs/QmZFbDTY9jfSBms2MchvYM9oYRbAF19K7Pby47yDBfpPrb/go-cid"
+	pnet "gx/ipfs/QmZaQ3K9PRd5sYYoG1xbTGPtd3N7TYiKBRmcBUTsx8HVET/go-libp2p-pnet"
+	bserv "gx/ipfs/QmbSB9Uh3wVgmiCb1fAb8zuC3qAE6un4kd1jvatUurfAmB/go-blockservice"
+	circuit "gx/ipfs/Qmbc6WjgbkaYhPw5dd6X2RLGiJz854dPPKkyZf52vE2PTS/go-libp2p-circuit"
+	bstore "gx/ipfs/QmcmpX42gtDv1fz24kau4wjS9hfwWj5VexWBKgGnWzsyag/go-ipfs-blockstore"
 	yamux "gx/ipfs/QmcsgrV3nCAKjiHKZhKVXWc4oY3WBECJCqahXEMpHeMrev/go-smux-yamux"
-	peer "gx/ipfs/QmdVrMn1LhB4ybb8hMVaMLXnA8XRSewMnK6YqXKXoTcRvN/go-libp2p-peer"
-	ic "gx/ipfs/Qme1knMqwt1hKZbc1BmQFmnm9f36nyQGwXxPGVpVJ9rMK5/go-libp2p-crypto"
-	ds "gx/ipfs/QmeiCcJfDW1GJnWUArudsv5rQsihpi4oyddPhdqo3CfX6i/go-datastore"
+	rhelpers "gx/ipfs/Qmd22J9AnyR3QUH56WPXkrTbCNkQ4x7TWWinHcZBhQkgVw/go-libp2p-routing-helpers"
+	nilrouting "gx/ipfs/Qmd45r5jHr1PKMNQqifnbZy1ZQwHdtXUDJFamUEvUJE544/go-ipfs-routing/none"
+	offroute "gx/ipfs/Qmd45r5jHr1PKMNQqifnbZy1ZQwHdtXUDJFamUEvUJE544/go-ipfs-routing/offline"
+	record "gx/ipfs/QmdHb9aBELnQKTVhvvA3hsQbRgUAwsWUzBP2vZ6Y5FBYvE/go-libp2p-record"
+	"gx/ipfs/QmdMPBephdLYNESkruDX2hcDTgFYhoCt4LimWhgnomSdV2/go-path/resolver"
+	mfs "gx/ipfs/QmdghKsSDa2AD1kC4qYRnVYWqZecdSBRZjeXRdhMYYhafj/go-mfs"
+	metrics "gx/ipfs/QmdhwKw53CTV8EJSAsR1bpmMT5kXiWBgeAyv1EXeeDiXqR/go-libp2p-metrics"
+	mplex "gx/ipfs/QmdiBZzwGtN2yHJrWD9ojQ7ASS48nv7BcojWLkYd1ZtrV2/go-smux-multiplex"
+	pstore "gx/ipfs/QmeKD8YT7887Xu6Z86iZmpYNxrLogJexqxEugSmaf14k64/go-libp2p-peerstore"
 )
 
 const IpnsValidatorTag = "ipns"
@@ -94,7 +95,7 @@ const (
 )
 
 func init() {
-	identify.ClientVersion = "go-ipfs/" + config.CurrentVersionNumber + "/" + config.CurrentCommit
+	identify.ClientVersion = "go-ipfs/" + version.CurrentVersionNumber + "/" + version.CurrentCommit
 }
 
 // IpfsNode is IPFS Core module. It represents an IPFS instance.
@@ -452,7 +453,26 @@ func (n *IpfsNode) startOnlineServicesWithHost(ctx context.Context, host p2phost
 	n.Ping = ping.NewPingService(host)
 
 	if pubsub || ipnsps {
-		service, err := floodsub.NewFloodSub(ctx, host)
+		cfg, err := n.Repo.Config()
+		if err != nil {
+			return err
+		}
+
+		var service *floodsub.PubSub
+
+		switch cfg.Pubsub.Router {
+		case "":
+			fallthrough
+		case "floodsub":
+			service, err = floodsub.NewFloodSub(ctx, host)
+
+		case "gossipsub":
+			service, err = floodsub.NewGossipSub(ctx, host)
+
+		default:
+			err = fmt.Errorf("Unknown pubsub router %s", cfg.Pubsub.Router)
+		}
+
 		if err != nil {
 			return err
 		}
@@ -792,7 +812,7 @@ func (n *IpfsNode) loadFilesRoot() error {
 			return fmt.Errorf("failure writing to dagstore: %s", err)
 		}
 	case err == nil:
-		c, err := cid.Cast(val.([]byte))
+		c, err := cid.Cast(val)
 		if err != nil {
 			return err
 		}

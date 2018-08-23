@@ -12,17 +12,17 @@ import (
 	cmds "github.com/ipfs/go-ipfs/commands"
 	e "github.com/ipfs/go-ipfs/core/commands/e"
 	repo "github.com/ipfs/go-ipfs/repo"
-	config "github.com/ipfs/go-ipfs/repo/config"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
 
-	inet "gx/ipfs/QmPjvxTpVH8qJyQDnxnsxF9kv9jezKD1kozz1hs3fCGsNh/go-libp2p-net"
+	swarm "gx/ipfs/QmPWNZRUybw3nwJH3mpkrwB97YEQmXRkzvyh34rpJiih6Q/go-libp2p-swarm"
+	peer "gx/ipfs/QmQsErDt8Qgw1XrsXf2BpEzDgGWtB1YLsTAARBup5b6B9W/go-libp2p-peer"
 	mafilter "gx/ipfs/QmSMZwvs3n4GBikZ7hKzT17c3bk65FmyZo2JqtJ16swqCv/multiaddr-filter"
+	cmdkit "gx/ipfs/QmSP88ryZkHSRn1fnngAaV2Vcn63WUJzAavnRM9CVdU1Ky/go-ipfs-cmdkit"
+	config "gx/ipfs/QmTyiSs9VgdVb4pnzdjtKhcfdTkHFEaNn6xnCbZq4DTFRt/go-ipfs-config"
+	iaddr "gx/ipfs/QmWnUZVLLk2HKpZAMEsqW3EFNku1xGzG7bvvAHeEQQoi2V/go-ipfs-addr"
+	inet "gx/ipfs/QmX5J1q63BrrDTbpcHifrFbxH3cMZsvaNajy6u3zCpzBXs/go-libp2p-net"
 	ma "gx/ipfs/QmYmsdtJ3HsodkePE3eU3TsCaP2YvPZJ4LoXnNkDE5Tpt7/go-multiaddr"
-	pstore "gx/ipfs/QmZR2XWVVBCtbgBWnQhWk2xcQfaR3W8faQPriAiaaj7rsr/go-libp2p-peerstore"
-	cmdkit "gx/ipfs/QmdE4gMduCKCGAcczM2F5ioYDfdeKuPix138wrES1YSr7f/go-ipfs-cmdkit"
-	peer "gx/ipfs/QmdVrMn1LhB4ybb8hMVaMLXnA8XRSewMnK6YqXKXoTcRvN/go-libp2p-peer"
-	iaddr "gx/ipfs/Qme4QgoVPyQqxVc4G1c2L2wc9TDa6o294rtspGMnBNRujm/go-ipfs-addr"
-	swarm "gx/ipfs/QmemVjhp1UuWPQqrWSvPcaqH3QJRMjMqNm4T2RULMkDDQe/go-libp2p-swarm"
+	pstore "gx/ipfs/QmeKD8YT7887Xu6Z86iZmpYNxrLogJexqxEugSmaf14k64/go-libp2p-peerstore"
 )
 
 type stringList struct {
@@ -72,7 +72,7 @@ var swarmPeersCmd = &cmds.Command{
 		}
 
 		if n.PeerHost == nil {
-			res.SetError(errNotOnline, cmdkit.ErrClient)
+			res.SetError(ErrNotOnline, cmdkit.ErrClient)
 			return
 		}
 
@@ -223,7 +223,7 @@ var swarmAddrsCmd = &cmds.Command{
 		}
 
 		if n.PeerHost == nil {
-			res.SetError(errNotOnline, cmdkit.ErrClient)
+			res.SetError(ErrNotOnline, cmdkit.ErrClient)
 			return
 		}
 
@@ -291,7 +291,7 @@ var swarmAddrsLocalCmd = &cmds.Command{
 		}
 
 		if n.PeerHost == nil {
-			res.SetError(errNotOnline, cmdkit.ErrClient)
+			res.SetError(ErrNotOnline, cmdkit.ErrClient)
 			return
 		}
 
@@ -331,7 +331,7 @@ var swarmAddrsListenCmd = &cmds.Command{
 		}
 
 		if n.PeerHost == nil {
-			res.SetError(errNotOnline, cmdkit.ErrClient)
+			res.SetError(ErrNotOnline, cmdkit.ErrClient)
 			return
 		}
 
@@ -381,7 +381,7 @@ ipfs swarm connect /ip4/104.131.131.82/tcp/4001/ipfs/QmaCpDMGvV2BGHeYERUEnRQAwe3
 		addrs := req.Arguments()
 
 		if n.PeerHost == nil {
-			res.SetError(errNotOnline, cmdkit.ErrClient)
+			res.SetError(ErrNotOnline, cmdkit.ErrClient)
 			return
 		}
 
@@ -446,7 +446,7 @@ it will reconnect.
 		addrs := req.Arguments()
 
 		if n.PeerHost == nil {
-			res.SetError(errNotOnline, cmdkit.ErrClient)
+			res.SetError(ErrNotOnline, cmdkit.ErrClient)
 			return
 		}
 
@@ -593,7 +593,7 @@ Filters default to those specified under the "Swarm.AddrFilters" config key.
 		}
 
 		if n.PeerHost == nil {
-			res.SetError(errNotOnline, cmdkit.ErrNormal)
+			res.SetError(ErrNotOnline, cmdkit.ErrNormal)
 			return
 		}
 
@@ -641,7 +641,7 @@ add your filters to the ipfs config file.
 		}
 
 		if n.PeerHost == nil {
-			res.SetError(errNotOnline, cmdkit.ErrNormal)
+			res.SetError(ErrNotOnline, cmdkit.ErrNormal)
 			return
 		}
 
@@ -714,7 +714,7 @@ remove your filters from the ipfs config file.
 		}
 
 		if n.PeerHost == nil {
-			res.SetError(errNotOnline, cmdkit.ErrNormal)
+			res.SetError(ErrNotOnline, cmdkit.ErrNormal)
 			return
 		}
 
